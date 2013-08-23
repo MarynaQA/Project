@@ -1,0 +1,109 @@
+<project name="EnglishTesting" default="test">
+	<property name="src.java" location ="src"/>
+	<property name="src.test" location="test"/>
+	<property name="build.dir" location="build"/>
+	<property name="build.classes.java" location="${build.dir}/class/java"/>
+
+	<property name="build.classes.test" location="${build.dir}/class/test"/>
+	<property name="html.report.dir" location="report"/>
+	<property name="build.jar" location ="${build.dir}/jar"/>
+	<property name="classpath.dir" location="/home/JavaClasses"/>
+	<property name="javadoc.dir"  location="javadoc"/>
+	
+	<target name="make.dirs" description="Making  of the auxillary dirs">
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${build.classes.java}"/>
+
+		<mkdir dir="${build.classes.test}"/>
+		<mkdir dir ="${html.report.dir}" />
+		<mkdir dir="${build.jar}"/>
+		<mkdir dir="${javadoc.dir}"/>
+	</target>
+	<target name="compile.java" description="Compilation of the classes" depends="make.dirs">
+		<echo>Compiling classes...</echo>
+		<javac includeantruntime="false"  destdir="${build.classes.java}">
+			<src path="${src.java}"/>
+		</javac>
+	</target>
+	<target name="compile.test" description="Compilation of the tests" depends="make.dirs, compile.java">
+		<echo>Compiling tests....</echo>
+		<javac includeantruntime="true"  destdir="${build.classes.test}">
+			<src path="${src.test}"/>
+			<classpath>
+				<pathelement location="${classpath.dir}/junit-4.5.jar"/>
+
+				<pathelement location="${build.classes.java}"/>
+			</classpath>
+		</javac>
+	</target>
+	<target name="compile" description="Compiling classes and tests" depends="compile.java, compile.test"/>
+	<target name="test" description="Start test EnglishTesting class" depends="compile">
+		<junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
+			<formatter type="plain" usefile="false"/>
+			<test name="testing.EnglishTestingTest"/>
+
+			<classpath>
+                		<pathelement location="${classpath.dir}/junit-4.5.jar"/>
+				<pathelement location="${build.classes.java}"/>
+				<pathelement location="${build.classes.test}"/>
+			</classpath>
+		</junit>
+	</target>
+
+	<target name="testsuite" description="Start TestSuite class" depends="compile">
+		<junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
+			<formatter type="xml"/>
+			<test name="suite.SuiteTests" todir="${html.report.dir}"/>
+			<test name="testing.EnglishTestingTest" todir="${html.report.dir}"/>
+			<classpath>
+				<pathelement location="${build.classes.java}"/>
+				<pathelement location="${build.classes.test}"/>
+			</classpath>
+		</junit>
+	</target>
+	<target name="report" description="" depends="testsuite">
+		<mkdir dir="${html.report.dir}/html"/>
+		<junitreport todir="${html.report.dir}" >
+			<fileset dir="${html.report.dir}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report todir="${html.report.dir}/html"/>
+		</junitreport>
+		
+	</target>
+	<target name="jar" description="Creating jar after tests" depends="compile, test">
+		<jar destfile="${build.jar}/EnglishTesting.jar" basedir="${build.classes.java}">
+			<manifest>
+				<attribute name="Main-Class" value="userconsole.ViewTesting"/>
+				<attribute name="Class-Path" value="${classpath.dir}/mysql-connector-java-5.1.14-bin.jar"/>
+				<attribute name ="Created-By" value ="(c) Sokunova Mariya"/>
+			</manifest>
+		</jar>
+
+	</target>
+	<target name="run" description="Run application" depends="jar">
+		<echo>Running application . . . </echo>
+		<java jar="${build.jar}/EnglishTesting.jar" fork="true"/>
+		<echo>Ok...</echo>	
+
+</target>
+	<target name="clean-build" depends="clean,jar"/>
+
+
+	<target name="clean" description="Delete auxillary dirs">
+		<echo>Deleting of the dirs</echo>
+		<delete dir="${build.dir}"/>
+	</target>
+	<target name="javadoc" description="Creating javadoc" depends="make.dirs">
+		<echo>Generation javadoc . . . </echo>
+		<javadoc destdir="${javadoc.dir}" sourcepath="${src.java}" author="true" version="true" 
+			 packagenames="*" windowtitle="EnglishTesting" use="true" >
+
+			<bottom>  
+			<![CDATA[<b>Sokunova Mariya, 2011<b>]]>
+			</bottom>
+
+		</javadoc>
+	</target>
+
+</project>
